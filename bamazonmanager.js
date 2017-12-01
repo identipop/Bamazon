@@ -1,7 +1,7 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 var Table = require("cli-table-redemption");
-var count = 0;
+
 
 var connection = mysql.createConnection({
   host: "localhost",
@@ -91,11 +91,11 @@ function lowInventory () {
   });
 }
 
-function updateInventory(){
+function updateInventory() {
+
 
   inquirer
-  .prompt([
-    {
+    .prompt([{
         name: "idinput",
         type: "input",
         message: "Please type in the ID of the product you'd like to update.",
@@ -126,26 +126,28 @@ function updateInventory(){
           return true;
         }
       }
-  ]).then(function(input){
+    ]).then(function(input) {
 
-    connection.query("SELECT stock_quantity FROM products WHERE item_id =?", [input.idinput], function(error, results, fields) {
-      connection.query("UPDATE products SET ? WHERE ?", [{
-        stock_quantity: input.quantity + results[0].stock_quantity
-      },
-      {
-        item_id: input.idinput
-      }
-    ],
-    function(e, r, f) {
-      if (!e) {
-        printTable();
-        console.log("Inventory updated!");
-}
-});
-}
-);
-}
-);
+      connection.query("SELECT stock_quantity FROM products WHERE item_id =?", [input.idinput], function(error, results, fields) {
+        if (error) {
+          start();
+        }
+
+        connection.query("UPDATE products SET ? WHERE ?", [{
+              stock_quantity: input.quantity + results[0].stock_quantity
+            },
+            {
+              item_id: input.idinput
+            }
+          ],
+          function(e, r, f) {
+            if (!e) {
+              printTable();
+              console.log("Inventory updated!");
+            }
+          });
+      });
+    });
 }
 
 function addNewProduct(){
@@ -178,6 +180,10 @@ function addNewProduct(){
     connection.query(
       "INSERT INTO products (product_name, department_name, price, stock_quantity) VALUES('"+ input.item + "', '" + input.department + "' ," + input.price + "," + input.quantity + ");",
       function(error, results, fields) {
+        if (error){
+          console.log("Enter a valid id!");
+          start();
+        }
       if (!error){
         printTable();
         console.log("New product added!");

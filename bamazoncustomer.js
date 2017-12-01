@@ -89,24 +89,31 @@ function start() {
                     var cost = res[0].price * userQuantity;
                     console.log("That will be $" + cost + " please!");
                     count++;
+
+
+                    connection.query("UPDATE products SET ? WHERE ?", [{
+                         product_sales: res[0].product_sales + cost
+                        },
+                        {
+                          item_id: userID
+                        }
+                      ],
+                      function(e, r, f) {
                     var timeOut = setTimeout(function() {
                       printTable(count);
                       clearTimeout(timeOut);
                     }, 4000);
-
-
-                  });
-                }
-
-              });
+                        });
+                });
+              }
           }
-
-
-        }
-      });
-    });
+        );
+      }
+    }
 }
-
+);
+});
+}
 
 function printTable(count) {
   connection.query("SELECT * FROM products", function(error, results, fields) {
